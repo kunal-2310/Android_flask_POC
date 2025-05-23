@@ -38,8 +38,11 @@ def receive_prompt():
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
     
     extract_fields = ChatPromptTemplate.from_messages([
-        ("system", "You are a precise assistant that extracts task details from a user's instruction and strictly reports any missing details."),
-        ("human", """This is a sample response format for reference only:
+        ("system", """You are a precise assistant that extracts task details from a user's instruction and strictly reports any missing details.
+
+    Today's date is {today_date} and current time is {current_time}.
+
+    This is a sample response format for reference only:
     {{
     "taskDescription": "AC Maintenance",
     "priority": "High",
@@ -48,35 +51,35 @@ def receive_prompt():
     "message": "please provide [taskDescription, priority, startTime, endTime]",
     "allfilled": false
     }}
-    Today's date is {today_date}.
 
     Instructions:
-    - keep the structure of the response same -[taskDescription,priority,startTime,endTime,message,allfilled]
+    - Keep the structure of the response same: [taskDescription, priority, startTime, endTime, message, allfilled].
     - Extract the following fields from the prompt I will provide:
     - taskDescription
     - priority (from urgency words like Critical, High, Normal, Low)
-    - startTime (use today's date if date isn't explicitly mentioned but time is)
-    - endTime (leave blank if no duration or end time is mentioned)
-    - Do not generate any extra fields.
+    - startTime (only if the time is provided and it's later than current time — if time only is given, attach today's date)
+    - endTime (extract only if a duration or end time is explicitly provided)
+
+    Important rules:
     - If a field is missing, leave it blank.
-    - If all fields except 'message' are filled, 'allfilled' should be true. Otherwise false.
+    - Do not invent or assume any data.
+    - The 'startTime' and 'endTime' must follow the exact format: dd-MM-yyyy hh:mm am/pm.
+    - If 'startTime' is provided as time-only and it is ahead of current time, combine it with today's date in the format.
+    - Do not fill 'startTime' if it's in the past or missing.
+    - Do not fill 'endTime' if no time or duration is mentioned.
     - The 'message' field should clearly state which of these fields are missing in this exact format:
         "please provide [taskDescription, priority, startTime, endTime]"
     listing the missing fields inside the square brackets, comma-separated.
+    - The 'allfilled' should be true only if all fields except 'message' are filled, otherwise false.
 
-    Important:
-    - Do not fill 'endTime' if no duration or end time is provided.
-    - Do not invent data.
-    - Follow the structure strictly.
-
-    Now here is the actual prompt: '{prompt}'
-    """)
+    Now here is the actual prompt: '{prompt}'""")
     ])
 
 
     messages = extract_fields.format_messages(
         prompt=actual_prompt,
-        today_date=datetime.now().strftime('%d-%m-%Y')
+        today_date=datetime.now().strftime('%d-%m-%Y'),
+        current_time=datetime.now().strftime('%I:%M:%S %p')
     )
     final_prompt = "\n\n".join([f"{m.type.upper()}: {m.content}" for m in messages])
 
