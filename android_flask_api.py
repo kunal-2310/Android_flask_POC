@@ -83,12 +83,12 @@ def receive_prompt():
     )
     final_prompt = "\n\n".join([f"{m.type.upper()}: {m.content}" for m in messages])
 
-    print("Final prompt :- ",final_prompt,"Ending of final prompt ------------------------------------------")
+    # print("Final prompt :- ",final_prompt,"Ending of final prompt ------------------------------------------")
 
     # Run OpenAI model
     result = llm.invoke(final_prompt)
     # print("OpenAI Result:\n", result.content)
-    print(f"Raw LLM Response: {result}")
+    # print(f"Raw LLM Response: {result}")
 
     match = re.search(r'\{.*?\}', result.content, re.DOTALL)
     if match:
@@ -100,8 +100,8 @@ def receive_prompt():
             "error": "Model did not return JSON. Prompt may be incomplete or invalid.",
             "rawResponse": result
         }
-    print("response :- ",result_json)
-    return jsonify(result_json)
+    # print("response :- ",result_json)
+    return jsonify({"answer":result_json})
 
 if __name__ == '__main__':
     # receive_prompt()
