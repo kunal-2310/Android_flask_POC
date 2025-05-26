@@ -31,6 +31,7 @@ def receive_prompt():
         return jsonify({"error": "Missing input field"}), 400
 
     actual_prompt = data['input']
+    print("actual input:- ",actual_prompt)
     # actual_prompt="Assign a medium-priority plumbing inspection task to Rohan Mehta. The site is a customer named Priya Verma. Schedule it for tomorrow at 3 PM."
 
     # Initialize OpenAI LLM
@@ -53,6 +54,7 @@ def receive_prompt():
     }}
 
     Instructions:
+    - if any garbage or vague input is given donot consider it as the task description, task description should be meaningful.
     - Keep the structure of the response same: [taskDescription, priority, startTime, endTime, message, allfilled].
     - Extract the following fields from the prompt I will provide:
     - taskDescription
@@ -100,7 +102,7 @@ def receive_prompt():
             "error": "Model did not return JSON. Prompt may be incomplete or invalid.",
             "rawResponse": result
         }
-    # print("response :- ",result_json)
+    print("response :- ",result_json)
     return jsonify({"answer":result_json})
 
 if __name__ == '__main__':
