@@ -38,8 +38,8 @@ def receive_prompt():
     # llm = ChatOpenAI(model="gpt-4o-mini")
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
     
- extract_fields = ChatPromptTemplate.from_messages([
-        ("system", """You are a precise assistant that extracts task details from a user's instruction and strictly reports any missing details.
+    extract_fields = ChatPromptTemplate.from_messages([
+    ("system", """You are a precise assistant that extracts task details from a user's instruction and strictly reports any missing details.
 
     Today's date is {today_date} and current time is {current_time}.
 
