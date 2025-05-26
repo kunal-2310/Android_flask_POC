@@ -54,7 +54,7 @@ def receive_prompt():
     }}
 
     Instructions:
-    - if any garbage or vague input is given donot consider it as the task description, task description should be meaningful.
+    - if any garbage or vague input is given donot consider it as the task description, task description must be meaningful.
     - Keep the structure of the response same: [taskDescription, priority, startTime, endTime, message, allfilled].
     - Extract the following fields from the prompt I will provide:
     - taskDescription
