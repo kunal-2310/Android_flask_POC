@@ -38,7 +38,7 @@ def receive_prompt():
     # llm = ChatOpenAI(model="gpt-4o-mini")
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
     
-    extract_fields = ChatPromptTemplate.from_messages([
+ extract_fields = ChatPromptTemplate.from_messages([
         ("system", """You are a precise assistant that extracts task details from a user's instruction and strictly reports any missing details.
 
     Today's date is {today_date} and current time is {current_time}.
@@ -59,7 +59,7 @@ def receive_prompt():
     - Extract the following fields from the prompt I will provide:
     - taskDescription
     - priority (from urgency words like Critical, High, Normal, Low)
-    - startTime (only if the time is provided and it's later than current time — if time only is given, attach today's date)
+    - startTime (If only the time is provided but not the date, then add today's date and add AM or PM just after the current time.)
     - endTime (extract only if a duration or end time is explicitly provided)
 
     Important rules:
