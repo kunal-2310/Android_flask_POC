@@ -31,6 +31,7 @@ def receive_prompt():
         return jsonify({"error": "Missing input field"}), 400
 
     actual_prompt = data['input']
+    print("actual input:- ",actual_prompt)
     # actual_prompt="Assign a medium-priority plumbing inspection task to Rohan Mehta. The site is a customer named Priya Verma. Schedule it for tomorrow at 3 PM."
 
     # Initialize OpenAI LLM
@@ -38,7 +39,7 @@ def receive_prompt():
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
     
     extract_fields = ChatPromptTemplate.from_messages([
-        ("system", """You are a precise assistant that extracts task details from a user's instruction and strictly reports any missing details.
+    ("system", """You are a precise assistant that extracts task details from a user's instruction and strictly reports any missing details.
 
     Today's date is {today_date} and current time is {current_time}.
 
@@ -53,27 +54,33 @@ def receive_prompt():
     }}
 
     Instructions:
+    - if any garbage or vague input is given donot consider it as the task description, task description must be meaningful.
     - Keep the structure of the response same: [taskDescription, priority, startTime, endTime, message, allfilled].
     - Extract the following fields from the prompt I will provide:
-    - taskDescription
-    - priority (from urgency words like Critical, High, Normal, Low)
-    - startTime (only if the time is provided and it's later than current time — if time only is given, attach today's date)
-    - endTime (extract only if a duration or end time is explicitly provided)
+      - taskDescription
+      - priority (from urgency words like Critical, High, Normal, Low)
+      - startTime
+      - endTime (extract only if a duration or end time is explicitly provided)
 
     Important rules:
     - If a field is missing, leave it blank.
     - Do not invent or assume any data.
     - The 'startTime' and 'endTime' must follow the exact format: dd-MM-yyyy hh:mm am/pm.
-    - If 'startTime' is provided as time-only and it is ahead of current time, combine it with today's date in the format.
-    - Do not fill 'startTime' if it's in the past or missing.
+    - If 'startTime' is provided as time-only:
+        - Attach today’s date to it.
+        - Compare the given time to the current time.
+        - If the given time has already passed in the current half of the day (am/pm), assign the other half (i.e., pm if it’s passed am, or am if it’s passed pm).
+        - If the given time is still upcoming, assign the current am/pm period.
+    - Do not fill 'startTime' if it's invalid, incomplete, or missing.
     - Do not fill 'endTime' if no time or duration is mentioned.
     - The 'message' field should clearly state which of these fields are missing in this exact format:
-        "please provide [taskDescription, priority, startTime, endTime]"
-    listing the missing fields inside the square brackets, comma-separated.
+      "please provide [taskDescription, priority, startTime, endTime]"
+      listing the missing fields inside the square brackets, comma-separated.
     - The 'allfilled' should be true only if all fields except 'message' are filled, otherwise false.
 
     Now here is the actual prompt: '{prompt}'""")
     ])
+
 
 
     messages = extract_fields.format_messages(
@@ -83,12 +90,12 @@ def receive_prompt():
     )
     final_prompt = "\n\n".join([f"{m.type.upper()}: {m.content}" for m in messages])
 
-    print("Final prompt :- ",final_prompt,"Ending of final prompt ------------------------------------------")
+    # print("Final prompt :- ",final_prompt,"Ending of final prompt ------------------------------------------")
 
     # Run OpenAI model
     result = llm.invoke(final_prompt)
     # print("OpenAI Result:\n", result.content)
-    print(f"Raw LLM Response: {result}")
+    # print(f"Raw LLM Response: {result}")
 
     match = re.search(r'\{.*?\}', result.content, re.DOTALL)
     if match:
@@ -101,7 +108,7 @@ def receive_prompt():
             "rawResponse": result
         }
     print("response :- ",result_json)
-    return jsonify(result_json)
+    return jsonify({"answer":result_json})
 
 if __name__ == '__main__':
     # receive_prompt()
