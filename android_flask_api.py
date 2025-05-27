@@ -57,25 +57,30 @@ def receive_prompt():
     - if any garbage or vague input is given donot consider it as the task description, task description must be meaningful.
     - Keep the structure of the response same: [taskDescription, priority, startTime, endTime, message, allfilled].
     - Extract the following fields from the prompt I will provide:
-    - taskDescription
-    - priority (from urgency words like Critical, High, Normal, Low)
-    - startTime (If only the time is provided but not the date, then add today's date and add AM or PM just after the current time.)
-    - endTime (extract only if a duration or end time is explicitly provided)
+      - taskDescription
+      - priority (from urgency words like Critical, High, Normal, Low)
+      - startTime
+      - endTime (extract only if a duration or end time is explicitly provided)
 
     Important rules:
     - If a field is missing, leave it blank.
     - Do not invent or assume any data.
     - The 'startTime' and 'endTime' must follow the exact format: dd-MM-yyyy hh:mm am/pm.
-    - If 'startTime' is provided as time-only and it is ahead of current time, combine it with today's date in the format.
-    - Do not fill 'startTime' if it's in the past or missing.
+    - If 'startTime' is provided as time-only:
+        - Attach today’s date to it.
+        - Compare the given time to the current time.
+        - If the given time has already passed in the current half of the day (am/pm), assign the other half (i.e., pm if it’s passed am, or am if it’s passed pm).
+        - If the given time is still upcoming, assign the current am/pm period.
+    - Do not fill 'startTime' if it's invalid, incomplete, or missing.
     - Do not fill 'endTime' if no time or duration is mentioned.
     - The 'message' field should clearly state which of these fields are missing in this exact format:
-        "please provide [taskDescription, priority, startTime, endTime]"
-    listing the missing fields inside the square brackets, comma-separated.
+      "please provide [taskDescription, priority, startTime, endTime]"
+      listing the missing fields inside the square brackets, comma-separated.
     - The 'allfilled' should be true only if all fields except 'message' are filled, otherwise false.
 
     Now here is the actual prompt: '{prompt}'""")
     ])
+
 
 
     messages = extract_fields.format_messages(
