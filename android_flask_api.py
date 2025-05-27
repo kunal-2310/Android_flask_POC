@@ -108,6 +108,21 @@ def receive_prompt():
             "rawResponse": result
         }
     print("response :- ",result_json)
+    
+    time_format = "%d-%m-%Y %I:%M %p"
+    start_time_str = result_json["startTime"]
+    if start_time_str:
+        start_time_str.upper()
+        start_time = datetime.strptime(start_time_str, time_format)
+        current_time=datetime.now()
+        if current_time > start_time:
+            # Toggle AM/PM
+            if start_time.strftime("%p") == "AM":
+                new_time = start_time.replace(hour=(start_time.hour % 12) + 12)
+            else:
+                new_time = start_time.replace(hour=(start_time.hour % 12))
+            result_json["startTime"] = new_time.strftime(time_format).lower()
+    
     return jsonify({"answer":result_json})
 
 if __name__ == '__main__':
