@@ -73,10 +73,16 @@ def receive_prompt():
         - If the given time is still upcoming, assign the current am/pm period.
     - Do not fill 'startTime' if it's invalid, incomplete, or missing.
     - Do not fill 'endTime' if no time or duration is mentioned.
-    - The 'message' field should clearly state which of these fields are missing in this exact format:
-      "please provide [taskDescription, priority, startTime, endTime]"
-      listing the missing fields inside the square brackets, comma-separated.
-    - The 'allfilled' should be true only if all fields except 'message' are filled, otherwise false.
+    
+    Rules for 'message' field:
+     Analyse the input provided, and if it contains any proper description of a task that specifies 
+     what job one has to perform (for eg: delivery, service, repair, sales etc) ONLY THEN check if it is unclear or not specific enough and then set 'message' as:
+      "Task description is not clear because (reason)"
+      Replace (reason) with a simple explanation addressing the exact problem.
+      Even if the task is vague, fill other valid fields- time and priority except taskDescription IF provided.         
+    In all other cases, the 'message' field will always be empty.
+          
+     The 'allfilled' should be true only if all fields except 'message' are filled, otherwise false.
 
     Now here is the actual prompt: '{prompt}'""")
     ])
